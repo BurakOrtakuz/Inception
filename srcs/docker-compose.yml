@@ -6,7 +6,7 @@ services:
     ports:
       - "443:443"
     volumes:
-      - wordpress_data:/var/www/html/wordpress
+      - wordpress_data:/var/www/html/
     links:
       - wordpress
     depends_on:
@@ -14,13 +14,14 @@ services:
     restart: always
     networks:
       - connection
+
   wordpress:
     container_name: wordpress
     build: ./requirements/wordpress
     expose:
       - 9000
     volumes:
-      - wordpress_data:/var/www/html/wordpress
+      - wordpress_data:/var/www/html
     environment:
       - WORDPRESS_DB_HOST=mariadb
       - WORDPRESS_DB_USER=exampleuser
@@ -31,6 +32,7 @@ services:
     restart: always
     networks:
       - connection
+
   mariadb:
     container_name: mariadb
     build: ./requirements/mariadb
@@ -63,4 +65,5 @@ volumes:
         device: /home/bortakuz/data/mariadb
 networks:
   connection:
+    name: connection
     driver: bridge
