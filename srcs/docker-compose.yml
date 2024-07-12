@@ -1,33 +1,66 @@
-version: '3.1'
-
+version: '3.9'
 services:
-  wordpress:
-    image: wordpress
-    restart: always
-    environment:
-      WORDPRESS_DB_HOST: db
-      WORDPRESS_DB_USER: exampleuser
-      WORDPRESS_DB_PASSWORD: examplepass
-      WORDPRESS_DB_NAME: exampledb
-    volumes:
-      - wordpress:/var/www/html
-
   nginx:
-    image: nginx
-    volumes:
-      - ./nginx/conf/.conf:/etc/nginx/nginx.conf
-      - wordpress:/var/www/html
+    container_name: nginx
+    build: ./requirements/nginx
     ports:
-      - 8080:80
-
-  db:
-    image: mysql:5.7
+      - "443:443"
+    volumes:
+      - wordpress_data:/var/www/html/wordpress
+    links:
+      - wordpress
+    depends_on:
+      - wordpress
     restart: always
-    environment:
-      MYSQL_DATABASE: exampledb
-      MYSQL_USER: exampleuser
-      MYSQL_PASSWORD: examplepass
-      MYSQL_RANDOM_ROOT_PASSWORD: '1'
-
-volumes:
+    networks:
+      - connection
   wordpress:
+    container_name: wordpress
+    build: ./requirements/wordpress
+    expose:
+      - 9000
+    volumes:
+      - wordpress_data:/var/www/html/wordpress
+    environment:
+      - WORDPRESS_DB_HOST=mariadb
+      - WORDPRESS_DB_USER=exampleuser
+      - WORDPRESS_DB_PASSWORD=examplepass
+      - WORDPRESS_DB_NAME=exampledb
+    links:
+      - mariadb
+    restart: always
+    networks:
+      - connection
+  mariadb:
+    container_name: mariadb
+    build: ./requirements/mariadb
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=exampledb
+      - MYSQL_USER=exampleuser
+      - MYSQL_PASSWORD=examplepass
+    expose:
+      - 3306
+    restart: always
+    networks:
+      - connection
+volumes:
+  wordpress_data:
+      name: wordpress
+      driver: local
+      driver_opts:
+        type: none
+        o: bind
+        device: /home/bortakuz/data/wordpress
+  mariadb_data:
+      name: mariadb
+      driver: local
+      driver_opts:
+        type: none
+        o: bind
+        device: /home/bortakuz/data/mariadb
+networks:
+  connection:
+    driver: bridge

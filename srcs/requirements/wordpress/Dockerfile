@@ -1,29 +1,19 @@
-# Start from the Debian Bullseye image
 FROM debian:bullseye
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    apache2 \
-    php \
-    libapache2-mod-php \
-    php-mysql \
-    wget \
-    unzip
+RUN apt-get update && apt-get install -y php-fpm php-mysql sendmail wget
 
-# Download and install WordPress
-WORKDIR /var/www/html
-RUN wget https://wordpress.org/latest.zip \
-    && unzip latest.zip \
-    && mv wordpress/* . \
-    && rmdir wordpress \
-    && rm latest.zip
+RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+    && chmod +x wp-cli.phar \
+    && mv wp-cli.phar /usr/local/bin/wp-cli
 
-# Configure Apache
-RUN chown -R www-data:www-data /var/www/html \
-    && a2enmod rewrite
+EXPOSE 9000
 
-# Copy the Apache configuration file
-#COPY ./000-default.conf /etc/apache2/sites-available/000-default.conf
+COPY ./conf/www.conf /etc/php/7.4/fpm/pool.d/
 
-# Start Apache
-CMD ["apachectl", "-D", "FOREGROUND"]
+COPY ./tools/wordpress_options.sh /
+
+RUN chmod +x /wordpress_options.sh
+
+ENTRYPOINT [ "/wordpress_options.sh" ]
+
+CMD [ "/usr/sbin/php-fpm7.4", "--nodaemonize" ]
