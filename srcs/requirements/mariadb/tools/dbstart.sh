@@ -4,9 +4,9 @@ service mariadb start
 
 sleep 3
 
-mariadb -e "CREATE DATABASE IF NOT EXISTS exampledb;"
-mariadb -e "SELECT 1 FROM mysql.user WHERE User = 'exampleuser';" | grep -q 1 || mariadb -e "CREATE USER 'exampleuser'@'%' IDENTIFIED BY 'examplepass';"
-mariadb -e "GRANT ALL PRIVILEGES ON exampledb.* TO 'exampleuser'@'%';"
+mariadb -e "CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE_NAME};"
+mariadb -e "SELECT 1 FROM mysql.user WHERE User = '${MYSQL_USER}';" | grep -q 1 || mariadb -e "CREATE USER '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';"
+mariadb -e "GRANT ALL PRIVILEGES ON ${MYSQL_DATABASE_NAME}.* TO '${MYSQL_USER}'@'%';"
 mariadb -e "FLUSH PRIVILEGES;"
 mariadb -e "SHUTDOWN;"
 

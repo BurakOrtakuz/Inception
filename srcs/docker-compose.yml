@@ -22,12 +22,16 @@ services:
       - 9000
     volumes:
       - wordpress_data:/var/www/html
+    env_file:
+      - .env
     environment:
-      - WORDPRESS_DB_HOST=mariadb
-      - WORDPRESS_DB_USER=exampleuser
-      - WORDPRESS_DB_PASSWORD=examplepass
-      - WORDPRESS_DB_NAME=exampledb
+      - WORDPRESS_DB_HOST=${MYSQL_HOSTNAME}
+      - WORDPRESS_DB_USER=${MYSQL_USER}
+      - WORDPRESS_DB_PASSWORD=${MYSQL_PASSWORD}
+      - WORDPRESS_DB_NAME=${MYSQL_DATABASE_NAME}
     links:
+      - mariadb
+    depends_on:
       - mariadb
     restart: always
     networks:
@@ -38,11 +42,13 @@ services:
     build: ./requirements/mariadb
     volumes:
       - mariadb_data:/var/lib/mysql
+    env_file:
+      - .env
     environment:
-      - MYSQL_ROOT_PASSWORD=rootpassword
-      - MYSQL_DATABASE=exampledb
-      - MYSQL_USER=exampleuser
-      - MYSQL_PASSWORD=examplepass
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE_NAME}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     expose:
       - 3306
     restart: always
@@ -55,14 +61,14 @@ volumes:
       driver_opts:
         type: none
         o: bind
-        device: /home/bortakuz/data/wordpress
+        device: ${LOCAL_DEVICE_WORDPRESS}
   mariadb_data:
       name: mariadb
       driver: local
       driver_opts:
         type: none
         o: bind
-        device: /home/bortakuz/data/mariadb
+        device: ${LOCAL_DEVICE_MARIADB}
 networks:
   connection:
     name: connection

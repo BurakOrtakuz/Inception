@@ -1,29 +1,17 @@
-.PHONY: all build_nginx build_wordpress build_mariadb clean fclean stop up
+.PHONY: all clean fclean stop up
 
-all: file build_nginx build_wordpress build_mariadb up
+all: file up
 
 file:
-	rm -rf /home/bortakuz/data
-	mkdir /home/bortakuz/data
-	mkdir /home/bortakuz/data/mariadb
-	mkdir /home/bortakuz/data/wordpress
-build_nginx:
-	docker build -t nginx ./srcs/requirements/nginx
-
-build_wordpress:
-	docker build -t wordpress ./srcs/requirements/wordpress
-
-build_mariadb:
-	docker build -t mariadb ./srcs/requirements/mariadb
-stop:
-	@docker-compose -f srcs/docker-compose.yml stop
-
+	test -d /home/bortakuz/data || mkdir /home/bortakuz/data
+	test -d /home/bortakuz/data/wordpress || mkdir /home/bortakuz/data/wordpress
+	test -d /home/bortakuz/data/mariadb || mkdir /home/bortakuz/data/mariadb
 clean:
-	@docker-compose -f srcs/docker-compose.yml down --volumes
+	@docker-compose -f srcs/docker-compose.yml down
 
 fclean: clean
 	@docker system prune -af
 	@rm -rf /home/bortakuz/data
 
 up:
-	docker-compose -f ./srcs/docker-compose.yml up
+	docker-compose -f ./srcs/docker-compose.yml up -d --build
